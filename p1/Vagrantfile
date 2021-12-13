@@ -1,0 +1,38 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+  config.vm.box = "centos/8"
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = 512
+    vb.cpus = 1
+    vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+  end
+
+# Vm 1
+  config.vm.define "asalahS" do |master|
+    master.vm.provider "virtualbox" do |vb|
+      vb.name = "asalahS"
+    end
+    master.vm.hostname = "asalahS"
+    master.vm.network "private_network", ip: "192.168.42.110"
+    master.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "/tmp/id_rsa.pub"
+    master.vm.provision "file", source: "~/.ssh/id_rsa", destination: "/tmp/id_rsa"
+    master.vm.provision "shell", privileged: true,  path: "scripts/master.sh"
+  end
+
+# Vm 2
+  config.vm.define "asalahSW" do |worker|
+    worker.vm.provider "virtualbox" do |vb|
+      vb.name = "asalahSW"
+    end
+    worker.vm.hostname = "asalahSW"
+    worker.vm.network "private_network", ip: "192.168.42.111"
+    worker.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "/tmp/id_rsa.pub"
+    worker.vm.provision "file", source: "~/.ssh/id_rsa", destination: "/tmp/id_rsa"
+    worker.vm.provision "shell", privileged: true,  path: "scripts/worker.sh"
+  end
+
+end
